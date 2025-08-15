@@ -4,17 +4,23 @@
 ---
 
 ## **📌 Table of Contents**  
-1. [Overview](#-overview)  
-2. [Features](#-features)  
-3. [Technical Architecture](#-technical-architecture)  
-4. [AI Model Development](#-ai-model-development)  
-5. [Demo](#-demo)  
-6. [Installation](#-installation)  
-7. [Usage](#-usage)  
-8. [Performance Metrics](#-performance-metrics)  
-9. [Tech Stack](#-tech-stack)  
-10. [Future Roadmap](#-future-roadmap)  
-11. [Contributing](#-contributing)  
+## 📚 Table of Contents
+
+- [🌐Overview](#🌐overview)
+- [Features](#features)
+- [🖥️Technical Architecture](#technical-architecture)
+- [Dataset Construction](#dataset-construction)
+- [📄 Dataset Description](#-dataset-description)
+- [Methodology](#methodology)
+- [Evaluation Metrics](#evaluation-metrics)
+- [Experimental Results](#experimental-results)
+- [📊 Model Performance Visualizations](#-model-performance-visualizations)
+- [⚙ Pipeline Usage](#-pipeline-usage)
+- [Example Usage](#example-usage)
+- [Technical Insights](#technical-insights)
+- [Installation](#installation)
+- [Future Roadmap](#future-roadmap)
+- [📜 License](#-license)
 
 ---
 
@@ -26,8 +32,38 @@ This tool implements a **machine learning-powered pipeline** for automated CV an
 - **Rule-based matching** for skill gap analysis
 
 ---
+## **✨ Features**  
 
-## Dataset Construction
+
+### **1. Multi-Stage Processing Pipeline**
+- **PDF Text Extraction**: Utilizes PyPDF2 for text extraction with fallback to pdfplumber for complex layouts
+- **Embedding** Leveraging Gemini embeddings for context-aware text representation
+- **Semantic Parsing**: Context-aware extraction of skills, experience, and education
+
+### **2. Predictive Analytics Engine**
+- **Regression-based rating predictor** (R² = 0.8821)
+- **Dynamic weighting** of technical vs. soft skills
+- **Threshold-based classification** for job matching
+
+### **3. Decision Support System**
+- **Interactive skill matrix visualization**
+- **Competency gap analysis**
+- **Probabilistic matching score** (0-100%)
+
+---
+## **🖥️ Technical Architecture**
+
+```mermaid
+graph TD
+    A[PDF Input] --> B[Text Extraction]
+    B --> C[Text Preprocessing]
+    C --> D[Feature Engineering]
+    D --> E[Model Inference]
+    E --> F[Result Visualization]
+    F --> G[Feedback Generation]
+```
+---
+## **Dataset Construction
 - Collected 5,882 annotated CVs 
 - Manual labeling by 3 domain experts (Cohen's κ = 0.82)
 - Feature engineering:
@@ -36,7 +72,7 @@ This tool implements a **machine learning-powered pipeline** for automated CV an
   - `education_weight`
   - `keyword_coverage`
 
-## 📄 Dataset Description
+##  **Dataset Description
 
 * **CV Input:** Structured string in the format:
 
@@ -113,8 +149,60 @@ $$
 > **Best Model:** Linear Regression with **R² = 0.8821**.
 
 ---
+Here’s a polished **README section** for showcasing your model’s visual comparison results:
 
-## Model Results
+---
+
+## 📊 Model Performance Visualizations
+
+To provide deeper insight into how the regression model ranks CVs, we generated **comparative visualizations** illustrating the relationship between candidate attributes and predicted scores.
+
+### **1. GPA vs Predicted Rating**
+
+* Displays the model’s sensitivity to academic performance.
+* Shows how higher GPAs correlate with higher predicted CV ratings.
+  
+  <img width="1001" height="386" alt="Screenshot 2025-08-16 000607" src="https://github.com/user-attachments/assets/684bf227-c51b-46e9-85cb-2f75971410e4" />
+  
+  <img width="967" height="341" alt="Screenshot 2025-08-16 000546" src="https://github.com/user-attachments/assets/b9f10d53-17a7-44bc-afe4-54e8d3e7792d" />
+
+
+
+
+### **2. Years of Experience vs Predicted Rating**
+
+* Highlights the contribution of industry experience to the ranking.
+  
+  <img width="957" height="389" alt="Screenshot 2025-08-16 000530" src="https://github.com/user-attachments/assets/64cbcef3-2b4e-44e3-9ad2-9b96fb7f67c0" />
+  
+  <img width="991" height="384" alt="Screenshot 2025-08-16 000458" src="https://github.com/user-attachments/assets/6c873887-b211-4ab0-804f-79f3834f863c" />
+  
+  <img width="1060" height="358" alt="Screenshot 2025-08-16 000356" src="https://github.com/user-attachments/assets/01dd94c4-e2d0-4fd7-8bfd-c96c17040e04" />
+ 
+### **3. Education Tier Impact**
+
+* Compares predicted ratings for graduates from **Tier-1 universities (e.g., NUST, GIKI, FAST)** vs mid-tier institutions.
+* Demonstrates the model’s learned bias based on dataset patterns.
+  
+  <img width="978" height="362" alt="Screenshot 2025-08-16 000101" src="https://github.com/user-attachments/assets/d69480b2-13a1-41d5-baac-9c6d9a1c47c2" />
+  
+  <img width="979" height="358" alt="Screenshot 2025-08-16 000009" src="https://github.com/user-attachments/assets/df21a981-2873-4e6d-87fd-9f2c1e3f6087" />
+  
+  <img width="1030" height="366" alt="Screenshot 2025-08-15 235953" src="https://github.com/user-attachments/assets/3f9d7936-193d-4dda-b5c3-0a47d28485ce" />
+
+### **4. Skill Count vs Predicted Rating**
+
+* Illustrates how the number of **relevant AI/ML skills** affects overall ranking.
+
+  
+* Helps visualize the importance of breadth in technical skillsets.
+
+  
+  <img width="967" height="373" alt="Screenshot 2025-08-16 000719" src="https://github.com/user-attachments/assets/8cb54437-9d5b-49f0-8596-042f81908d7e" />
+  
+  <img width="983" height="363" alt="Screenshot 2025-08-16 000702" src="https://github.com/user-attachments/assets/5f4fc622-49f6-495c-8ba3-fc95eaacd60c" />
+
+
 
 ---
 
@@ -295,38 +383,9 @@ streamlit run app.py
 
 ---
 
-## **✨ Features**  
 
 
-### **1. Multi-Stage Processing Pipeline**
-- **PDF Text Extraction**: Utilizes PyPDF2 for text extraction with fallback to pdfplumber for complex layouts
-- **Embedding** Leveraging Gemini embeddings for context-aware text representation
-- **Semantic Parsing**: Context-aware extraction of skills, experience, and education
 
-### **2. Predictive Analytics Engine**
-- **Regression-based rating predictor** (R² = 0.8821)
-- **Dynamic weighting** of technical vs. soft skills
-- **Threshold-based classification** for job matching
-
-### **3. Decision Support System**
-- **Interactive skill matrix visualization**
-- **Competency gap analysis**
-- **Probabilistic matching score** (0-100%)
-
----
-
-## **🖥️ Technical Architecture**
-
-```mermaid
-graph TD
-    A[PDF Input] --> B[Text Extraction]
-    B --> C[Text Preprocessing]
-    C --> D[Feature Engineering]
-    D --> E[Model Inference]
-    E --> F[Result Visualization]
-    F --> G[Feedback Generation]
-```
----
 
 ## **⚙️ Installation**
 
