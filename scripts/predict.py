@@ -27,10 +27,10 @@ def predict_rating(cv_text):
 
 # Example usage
 if __name__ == "__main__":
-    sample_cv = """Education: Bachelors of Data Science at Punjab University, 
-                 Experience: 2 years as AI researcher at Awaaz AI,
-                 GPA: 1,
-                 Skills: Python, C++, SQL, JAVA"""
+    sample_cv = """Education: Bachelors of Data Science at Sargodha University, 
+                 Experience: 5 years as AI researcher at Awaaz AI,
+                 GPA: 3.5,
+                 Skills:  SQL, JAVA, Machine Learning, Deep Learning"""
 
     predicted_rating = predict_rating(sample_cv)
     print(f"Predicted Rating: {predicted_rating}")
