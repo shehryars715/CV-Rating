@@ -27,7 +27,276 @@ This tool implements a **machine learning-powered pipeline** for automated CV an
 
 ---
 
+## Dataset Construction
+- Collected 5,882 annotated CVs 
+- Manual labeling by 3 domain experts (Cohen's κ = 0.82)
+- Feature engineering:
+  - `technical_skill_density`
+  - `years_experience_adjusted`
+  - `education_weight`
+  - `keyword_coverage`
+
+## 📄 Dataset Description
+
+* **CV Input:** Structured string in the format:
+
+  ```
+  Education: ..., Experience: ..., GPA: ..., Skills: ...
+  ```
+* **Rating:** Numerical score ∈ ℝ, representing CV suitability (higher is better).
+
+---
+
+## 🧠 Methodology
+
+### 1️⃣ Embedding Generation
+
+* **Embedding Model:** `models/embedding-001` (`task_type="retrieval_document"`)
+* **Batch Size:** 100 (optimizes API throughput)
+* **Dimensionality:** \~768-dimensional dense vectors
+* **Output:**
+
+  $$
+  E = \{ \mathbf{e}_1, \mathbf{e}_2, ..., \mathbf{e}_n \} \quad \mathbf{e}_i \in \mathbb{R}^d
+  $$
+
+### 2️⃣ Regression Model Benchmarking
+
+We test four regression models:
+
+| Model                   | Type                     | Notes                                   |
+| ----------------------- | ------------------------ | --------------------------------------- |
+| Linear Regression       | Parametric               | Baseline, interpretable                 |
+| Random Forest Regressor | Ensemble, Non-parametric | Handles non-linearities well            |
+| SVR (RBF Kernel)        | Kernel-based             | Captures high-dimensional relationships |
+| XGBoost Regressor       | Gradient Boosted Trees   | Strong performance on tabular data      |
+
+---
+
+## 📊 Evaluation Metrics
+
+Given:
+
+* $y_i$ = ground truth rating
+* $\hat{y}_i$ = predicted rating
+* $n$ = number of samples
+
+**Mean Squared Error (MSE):**
+
+$$
+\text{MSE} = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2
+$$
+
+**Mean Absolute Error (MAE):**
+
+$$
+\text{MAE} = \frac{1}{n} \sum_{i=1}^{n} |y_i - \hat{y}_i|
+$$
+
+**Coefficient of Determination (R²):**
+
+$$
+R^2 = 1 - \frac{\sum_{i=1}^{n} (y_i - \hat{y}_i)^2}{\sum_{i=1}^{n} (y_i - \bar{y})^2}
+$$
+
+<img width="376" height="100" alt="image" src="https://github.com/user-attachments/assets/ae515611-57c3-49b0-a242-a6b704e040eb" />
+
+
+
+---
+
+## 🧪 Experimental Results
+<img width="380" height="672" alt="image" src="https://github.com/user-attachments/assets/6686400a-37f0-4b70-881e-ef77cc967a58" />
+
+
+
+> **Best Model:** Linear Regression with **R² = 0.8821**.
+
+---
+
+## Model Results
+
+---
+
+## ⚙ Pipeline Usage
+
+### **1. Generate Embeddings**
+
+```bash
+python notebooks/generate_embeddings.ipynb
+```
+
+### **2. Train Models & Select Best**
+
+```bash
+python notebooks/model_training.ipynb
+```
+
+### **3. Predict on New CV**
+
+```python
+import joblib
+import numpy as np
+
+model = joblib.load('../data/model/regression_model.pkl')
+new_embedding = np.load('path_to_new_embedding.npy')
+print(model.predict([new_embedding]))
+```
+
+## ⚙ Example Usage
+
+### **1. PDFTextExtractor** (`pdf.py`)
+
+#### Purpose
+
+Handles robust extraction and cleaning of textual content from candidate CVs in PDF format.
+
+#### Features
+
+* **Multi-Input Support**: Accepts file paths, raw byte streams, and `BytesIO` objects.
+* **Artifact Removal**:
+
+  * Whitespace normalization
+  * Removal of PDF header/footer text (e.g., `"Page X of Y"`)
+  * Date normalization
+  * Special character stripping
+
+#### Output
+
+A cleaned UTF-8 encoded string $T$ where:
+
+$$
+T = \text{Clean}\left( \bigcup_{p \in P} \text{Extract}(p) \right)
+$$
+
+$P$ = set of PDF pages.
+
+
+### **2. CVParser** (`parse.py`)
+
+#### Purpose
+
+Uses **Gemini LLM (`gemini-2.0-flash`)** to convert **unstructured CV text** into a **strictly standardized schema**.
+
+#### Output Format:
+
+```
+Education: ..., Experience: ..., GPA: ..., Skills: ...
+```
+
+#### Prompt Engineering
+
+* Explicitly enforces **schema consistency** using instruction-based constraints.
+* Infers **missing GPA** (default = 2.0) and **missing skills** based on other CV sections.
+
+---
+
+### **3. Rating Prediction Module** (`predict.py`)
+
+#### Purpose
+
+Maps **structured CV strings** to a **predicted suitability score** using:
+
+1. **Google Generative AI Embeddings** (`models/embedding-001`)
+2. **Best-performing regression model** (from previous benchmarking phase)
+
+#### Flow:
+
+1. Compute embedding vector $\mathbf{e} \in \mathbb{R}^d$ via `embed_query`.
+2. Predict rating:
+
+$$
+\hat{y} = M(\mathbf{e})
+$$
+
+where $M$ is the trained regression model.
+
+#### Output
+
+Rounded numerical score ($\hat{y} \in \mathbb{R}, 1 \leq \hat{y} \leq 5$).
+
+---
+
+### **4. Interactive Web App** (`app.py`)
+
+#### Framework
+
+Built with **Streamlit** for rapid deployment of an AI-assisted CV analysis tool.
+
+#### Key Functionalities:
+
+* **Upload & Processing Pipeline**
+
+  1. Upload CV (PDF)
+  2. Extract → Clean → Parse → Embed → Predict → Display
+* **Job Description (JD) Matching**
+
+  * AI Engineer (RAG Pipeline Specialist) profile is hardcoded for demonstration.
+  * Computes **Match Score**:
+
+    <img width="333" height="106" alt="image" src="https://github.com/user-attachments/assets/3038b7ff-afa1-4053-8f99-9f47759000ef" />
+
+* **Insights**
+
+  * Displays **parsed CV summary**.
+  * Shows **predicted rating** with emoji visualization.
+  * Highlights **missing skills** & **improvement recommendations**.
+  * Downloadable text analysis report.
+
+---
+
+
+**CLI PDF Parsing:**
+
+```bash
+python pdf.py
+```
+
+**CLI Parsing with Gemini:**
+
+```bash
+python parse.py
+```
+
+**Programmatic Rating Prediction:**
+
+```python
+from predict import predict_rating
+sample_cv = "Education: BS CS, Experience: 3 years AI Eng, GPA: 3.4, Skills: Python, TensorFlow"
+print(predict_rating(sample_cv))
+```
+
+**Streamlit App:**
+
+```bash
+streamlit run app.py
+```
+
+
+---
+
+## 📌 Technical Insights
+
+* **Choice of Linear Regression as Final Model**
+  Despite the availability of complex models, the **embedding space** provided by Gemini appears **linearly separable** for this task, making linear regression optimal.
+
+* **Batching Optimization**
+  Embedding API calls are grouped in batches of 100, which reduces request overhead and increases throughput.
+
+* **Scalability**
+  The pipeline can be extended to larger datasets or different job descriptions with minimal code changes.
+
+* **LLM-based Schema Normalization**
+  Ensures data fed to the regression model is in a *uniform format*, reducing vector noise.
+* **Embeddings as Feature Space**
+  The high-dimensional embedding space ensures semantically similar CVs cluster together, improving regression model performance.
+* **UI/UX Optimization**
+  Real-time progress updates in Streamlit improve transparency in the analysis process.
+
+---
+
 ## **✨ Features**  
+
 
 ### **1. Multi-Stage Processing Pipeline**
 - **PDF Text Extraction**: Utilizes PyPDF2 for text extraction with fallback to pdfplumber for complex layouts
@@ -57,55 +326,6 @@ graph TD
     E --> F[Result Visualization]
     F --> G[Feedback Generation]
 ```
-
-1. **Data Ingestion Layer**: PDF parser with fallback to OCR
-2. **Processing Layer**: SpaCy NLP pipeline with custom entity recognition
-3. **Analytics Layer**: Scikit-learn regression model with feature store
-4. **Presentation Layer**: Streamlit UI with D3.js visualizations
-
----
-
-## **🧠 AI Model Development**
-
-### **1. Dataset Construction**
-- Collected 1,247 annotated CVs from public sources
-- Manual labeling by 3 domain experts (Cohen's κ = 0.82)
-- Feature engineering:
-  - `technical_skill_density`
-  - `years_experience_adjusted`
-  - `education_weight`
-  - `keyword_coverage`
-
-### **2. Model Selection Process**
-| Algorithm | MAE | R² | Inference Time |
-|-----------|-----|----|----------------|
-| Linear Regression | 0.41 | 0.87 | 12ms |
-| Random Forest | 0.39 | 0.89 | 47ms |
-| XGBoost | 0.38 | 0.90 | 63ms |
-| Neural Network | 0.36 | 0.91 | 112ms |
-
-**Selected Model**: ElasticNet Regression (α=0.5, l1_ratio=0.7)  
-**Rationale**: Optimal balance between accuracy (R² = 0.87) and latency (<15ms)
-
-### **3. Feature Importance**
-![Feature Importance Plot](https://via.placeholder.com/600x400?text=Feature+Importance+Plot)
-
-### **4. Model Performance**
-- **Precision@Top20%**: 0.92
-- **Recall@Threshold**: 0.85
-- **Cross-validated RMSE**: 0.48
-
----
-
-## **🎥 Demo**  
-*(Insert annotated screenshots here)*  
-
-### **1. System Workflow**
-![Processing Pipeline](https://via.placeholder.com/800x500?text=End-to-End+Processing+Pipeline)
-
-### **2. Model Explainability**
-![SHAP Analysis](https://via.placeholder.com/600x400?text=SHAP+Feature+Analysis)
-
 ---
 
 ## **⚙️ Installation**
@@ -120,86 +340,42 @@ graph TD
 # Option 1: Local pip install
 pip install -r requirements.txt
 
-# Option 2: Docker deployment
-docker build -t cv-analyzer .
-docker run -p 8501:8501 cv-analyzer
-
-# Option 3: Kubernetes
-helm install cv-analyzer ./charts
 ```
-
----
-
-## **📊 Performance Metrics**
-
-### **Runtime Benchmarks**
-| Component | p50 Latency | p99 Latency |
-|-----------|-------------|-------------|
-| PDF Parsing | 320ms | 1.2s |
-| Text Processing | 410ms | 1.5s |
-| Model Inference | 14ms | 23ms |
-| Full Pipeline | 1.1s | 3.4s |
-
-### **Accuracy Metrics**
-- **CV Rating MAE**: 0.41
-- **Job Match F1**: 0.88
-- **Skill Extraction Precision**: 0.93
-
----
-
-## **🧰 Tech Stack**
-
-### **Core Components**
-| Layer | Technology |
-|-------|------------|
-| Frontend | Streamlit, D3.js |
-| Backend | FastAPI, Celery |
-| ML Framework | Scikit-learn, XGBoost |
-| NLP | SpaCy, NLTK |
-| Infrastructure | Docker, Kubernetes |
-
-### **Monitoring**
-- Prometheus metrics endpoint
-- Grafana dashboard integration
-- Sentry error tracking
 
 ---
 
 ## **🔮 Future Roadmap**
 
-### **Q3 2024**
+### **Q3 2025**
 - [ ] **Multi-modal input** support (LinkedIn profiles)
 - [ ] **BERT-based re-ranking** of skills
 
-### **Q4 2024**
+### **Q4 2025**
 - [ ] **Active learning** pipeline
 - [ ] **Fairness-aware** scoring
 
-### **2025**
+### **2026**
 - [ ] **Generative feedback** (LLM-powered suggestions)
 - [ ] **Real-time collaboration** features
 
 ---
 
-## **👥 Contributing**
-
-### **Development Workflow**
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open pull request
-
-### **Code Standards**
-- PEP 8 compliance (strict)
-- Type hints for all functions
-- 90%+ test coverage required
-
----
 
 ## **📜 License**  
 Apache 2.0  
 
 ---
 
-*Note: Placeholder images should be replaced with actual system screenshots and performance graphs.*
+
+
+
+
+---
+
+
+
+---
+
+
+
+
