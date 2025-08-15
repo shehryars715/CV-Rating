@@ -4,7 +4,6 @@
 ---
 
 ## **📌 Table of Contents**  
-## 📚 Table of Contents
 
 - [🌐Overview](#🌐overview)
 - [Features](#features)
@@ -202,6 +201,28 @@ To provide deeper insight into how the regression model ranks CVs, we generated 
 
 
 ---
+## **🎯 Streamlit Interface – Visual Example**
+
+The project provides an interactive Streamlit dashboard for real-time CV scoring.
+Below is an example of the interface in action:
+
+<img width="1865" height="786" alt="Screenshot 2025-08-16 003814" src="https://github.com/user-attachments/assets/9b9096b4-2bd0-4f14-a0e4-0a21e387e4df" />
+
+
+<img width="1864" height="813" alt="Screenshot 2025-08-16 003907" src="https://github.com/user-attachments/assets/f8979ae5-9151-4a0e-8c35-a5426db04c7e" />
+
+
+## Displayed Example: 
+* 📂 **Upload Section** – Supports `.pdf` and `.docx` CV uploads
+* 🧹 **Preprocessing Preview** – Shows extracted and cleaned CV text
+* 📊 **Feature Extraction** – Displays GPA, education tier, skills, and experience
+* ⚡ **Real-Time Scoring** – Predicts CV rating using trained regression model
+* 📈 **Ranking Table** – Compares multiple CVs side-by-side
+* 🎨 **Visual Feedback** – Gauge/graph for score interpretation
+
+---
+
+📌 This visualization demonstrates the model’s ability to parse, evaluate, and rank resumes within a clean and user-friendly interface.
 
 ## ⚙ Pipeline Usage
 
