@@ -63,7 +63,7 @@ graph TD
     F --> G[Feedback Generation]
 ```
 ---
-## **Dataset Construction
+## **Dataset Construction**
 - Collected 5,882 annotated CVs 
 - Manual labeling by 3 domain experts (Cohen's κ = 0.82)
 - Feature engineering:
@@ -72,7 +72,7 @@ graph TD
   - `education_weight`
   - `keyword_coverage`
 
-##  **Dataset Description
+##  **Dataset Description**
 
 * **CV Input:** Structured string in the format:
 
@@ -147,9 +147,6 @@ $$
 
 
 > **Best Model:** Linear Regression with **R² = 0.8821**.
-
----
-Here’s a polished **README section** for showcasing your model’s visual comparison results:
 
 ---
 
@@ -427,13 +424,6 @@ Apache 2.0
 
 
 
-
-
----
-
-
-
----
 
 
 
